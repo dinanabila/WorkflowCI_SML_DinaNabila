@@ -61,7 +61,6 @@ jobs:
           git lfs track "mlruns/**"
           git add .gitattributes
           git commit -m "Track large files in mlruns with Git LFS" || true
-      
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
           git add -f mlruns/
           git commit -m "Save mlruns from CI run" || true
