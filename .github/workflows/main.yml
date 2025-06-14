@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mlflow tensorflow pandas scikit-learn matplotlib dagshub
+          pip install mlflow tensorflow pandas numpy keras_tuner matplotlib scikit-learn dagshub
 
       - name: Run mlflow project
         run: |
