@@ -9,8 +9,8 @@ from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 import dagshub
 
 # load dataset
-x_train_dataset = pd.read_csv("/MLProject/preprocessed-dataset/x_train_preprocessing.csv", index_col='Date').astype(np.float32)
-x_valid_dataset = pd.read_csv("/MLProject/preprocessed-dataset/x_valid_preprocessing.csv", index_col='Date').astype(np.float32)
+x_train_dataset = pd.read_csv("https://raw.githubusercontent.com/dinanabila/WorkflowCI_SML_DinaNabila/main/MLProject/preprocessed-dataset/x_train_preprocessing.csv", index_col='Date').astype(np.float32)
+x_valid_dataset = pd.read_csv("https://raw.githubusercontent.com/dinanabila/WorkflowCI_SML_DinaNabila/main/MLProject/preprocessed-dataset/x_valid_preprocessing.csv", index_col='Date').astype(np.float32)
 
 N_FEATURES = x_train_dataset.shape[1]
 N_PAST = 60
