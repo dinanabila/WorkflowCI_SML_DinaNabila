@@ -22,6 +22,8 @@ jobs:
         run: echo "Start CI/CD pipeline"
 
       - uses: actions/checkout@v3
+        with:
+          lfs: true  # ✅ Penting untuk LFS support
 
       - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
@@ -50,26 +52,23 @@ jobs:
 
       - name: Set up Git auth with PAT
         run: |
+          git config --global user.name "${{ secrets.username }}"
+          git config --global user.email "${{ secrets.email }}"
           git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
-          
+
       - name: Set up Git LFS
         run: |
-          git config --global user.name ${{ secrets.username }}
-          git config --global user.email ${{ secrets.email }}
           git lfs install
           git lfs track "mlruns/**"
-          git add .gitattributes
+          git add .gitattributes || true
           git commit -m "Track large files in mlruns with Git LFS" || true
-          git push origin main
-          
-       # Save models to GitHub Repository
+          git push origin main || true  # push .gitattributes kalau belum ada
+
       - name: Save mlruns to repo
         run: |
-          git config --global user.name ${{ secrets.username }}
-          git config --global user.email ${{ secrets.email }}
           git add -f mlruns/
           git commit -m "Save mlruns from CI run" || true
-          git push origin main
+          git push origin main || true
 
       - name: Build Docker Model
         run: |
