@@ -56,7 +56,7 @@ jobs:
         run: |
           git config --global user.name "$USERNAME"
           git config --global user.email "$EMAIL"
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
+          git remote set-url origin https://${GH_TOKEN}@github.com/${{ github.repository }}
           git lfs install
           git lfs track "mlruns/**"
           git add .gitattributes
