@@ -2,62 +2,69 @@ name: CI MLflow
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 env:
-  CSV_URL: "MLproject/train_pca.csv"
-  TARGET_VAR: "Credit_Score"
+  TRAIN_CSV: "preprocessed-dataset/x_train_preprocessing.csv"
+  VALID_CSV: "preprocessed-dataset/x_valid_preprocessing.csv"
+  TARGET_VAR: "Egg Sales"
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Set up job
+        run: echo "Start CI/CD pipeline"
+
+      - uses: actions/checkout@v3
 
       - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
         with:
           python-version: "3.12.7"
 
-      - name: Check environment variables
-        run: echo "Dataset URL is $CSV_URL"
+      - name: Check Env
+        run: |
+          echo "Train CSV: $TRAIN_CSV"
+          echo "Valid CSV: $VALID_CSV"
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mlflow
+          pip install mlflow tensorflow pandas scikit-learn matplotlib dagshub
 
-      - name: Run MLflow project
+      - name: Run mlflow project
         run: |
           mlflow run . --env-manager=local
 
       - name: Get latest MLflow run_id
-        id: get_run_id
         run: |
           RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
 
-      - name: Copy model artifacts to saved_models/
+      - name: Copy artifacts to repo folder
         run: |
-          mkdir -p saved_models/$RUN_ID
-          cp -r mlruns/0/$RUN_ID/artifacts/model/* saved_models/$RUN_ID/
+          mkdir -p saved_artifacts/
+          cp -r mlruns/0/$RUN_ID/artifacts/model/* saved_artifacts/
+          echo "Artifacts copied to saved_artifacts/"
 
-      - name: Commit and push model artifacts
+      - name: Commit artifacts to repo
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add saved_models/
-          git commit -m "Add model artifacts for run_id $RUN_ID"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add saved_artifacts/
+          git commit -m "🔁 Add trained model artifacts [skip ci]" || echo "No changes to commit"
           git push origin main
 
-      - name: Build Docker model
+      - name: Build Docker Model
         run: |
-          mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name "cc"
+          mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name "penjualan_telur_model"
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -65,10 +72,13 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Tag Docker image
+      - name: Tag Docker Image
         run: |
-          docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/cc:latest
+          docker tag penjualan_telur_model ${{ secrets.DOCKER_HUB_USERNAME }}/penjualan_telur_model:latest
 
-      - name: Push Docker image to Docker Hub
+      - name: Push Docker Image
         run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/cc:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/penjualan_telur_model:latest
+
+      - name: Complete job
+        run: echo "✅ CI/CD workflow selesai dan model disimpan ke repo"
