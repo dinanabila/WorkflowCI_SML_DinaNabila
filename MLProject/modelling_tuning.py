@@ -6,7 +6,7 @@ import keras_tuner as kt
 import matplotlib.pyplot as plt
 import os
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
-import dagshub
+# import dagshub
 
 # load dataset
 x_train_dataset = pd.read_csv("https://raw.githubusercontent.com/dinanabila/WorkflowCI_SML_DinaNabila/main/MLProject/preprocessed-dataset/x_train_preprocessing.csv", index_col='Date').astype(np.float32)
@@ -50,7 +50,7 @@ early_stop = tf.keras.callbacks.EarlyStopping(monitor="val_mae", patience=3, res
 # MLflow
 # mlflow.set_tracking_uri("http://127.0.0.1:5000")
 # mlflow.set_experiment("/prediksi-penjualan-telur")
-dagshub.init(repo_owner='dinanabila', repo_name='prediksi-penjualan-telur', mlflow=True)
+# dagshub.init(repo_owner='dinanabila', repo_name='prediksi-penjualan-telur', mlflow=True)
 
 tuner = kt.RandomSearch(
     build_model,
