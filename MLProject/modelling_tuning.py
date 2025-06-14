@@ -108,7 +108,7 @@ with mlflow.start_run():
     mlflow.log_artifact("plot_prediction_vs_actual.png")
 
     # simpan model
-    best_model.save("best_model_lstm.keras")
-    mlflow.log_artifact("best_model_lstm.keras")
+    # best_model.save("best_model_lstm.keras")
+    # mlflow.log_artifact("best_model_lstm.keras")
 
     mlflow.keras.log_model(model=best_model, artifact_path="model")
