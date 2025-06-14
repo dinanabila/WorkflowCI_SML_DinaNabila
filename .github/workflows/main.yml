@@ -18,12 +18,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up job
-        run: echo "Start CI/CD pipeline"
-
-      - uses: actions/checkout@v3
+      - name: Checkout with PAT
+        uses: actions/checkout@v3
         with:
-          lfs: true  # ✅ Penting untuk LFS support
+          token: ${{ secrets.GH_PAT }}
+          lfs: true
 
       - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
@@ -42,33 +41,32 @@ jobs:
 
       - name: Run mlflow project
         run: |
-          mlflow run MLProject --env-manager=local 
-          
+          mlflow run MLProject --env-manager=local
+
       - name: Get latest MLflow run_id
         run: |
           RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
 
-      - name: Set up Git auth with PAT
+      - name: Git config
         run: |
           git config --global user.name "${{ secrets.username }}"
           git config --global user.email "${{ secrets.email }}"
-          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
 
-      - name: Set up Git LFS
+      - name: Git LFS track
         run: |
           git lfs install
           git lfs track "mlruns/**"
-          git add .gitattributes || true
+          git add .gitattributes
           git commit -m "Track large files in mlruns with Git LFS" || true
-          git push origin main || true  # push .gitattributes kalau belum ada
+          git push origin main
 
       - name: Save mlruns to repo
         run: |
           git add -f mlruns/
           git commit -m "Save mlruns from CI run" || true
-          git push origin main || true
+          git push origin main
 
       - name: Build Docker Model
         run: |
@@ -87,6 +85,3 @@ jobs:
       - name: Push Docker Image
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/penjualan_telur_model:latest
-
-      - name: Complete job
-        run: echo "✅ CI/CD workflow selesai dan model disimpan ke repo"
