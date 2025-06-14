@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mlflow tensorflow pandas numpy keras_tuner matplotlib scikit-learn dagshub
+          pip install mlflow tensorflow pandas numpy keras_tuner matplotlib scikit-learn
 
       - name: Run mlflow project
         run: |
@@ -48,18 +48,23 @@ jobs:
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
 
-      - name: Copy artifacts to repo folder
+      - name: Set up Git LFS
         run: |
-          mkdir -p saved_artifacts/
-          cp -r mlruns/0/$RUN_ID/artifacts/model/* saved_artifacts/
-          echo "Artifacts copied to saved_artifacts/"
-
-      - name: Commit artifacts to repo
+          git config --global user.name ${{ secrets.username }}
+          git config --global user.email ${{ secrets.email }}
+          git lfs install
+          git lfs track "mlruns/**"
+          git add .gitattributes
+          git commit -m "Track large files in mlruns with Git LFS" || true
+          git push origin main
+          
+       # Save models to GitHub Repository
+      - name: Save mlruns to repo
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add saved_artifacts/
-          git commit -m "🔁 Add trained model artifacts [skip ci]" || echo "No changes to commit"
+          git config --global user.name ${{ secrets.username }}
+          git config --global user.email ${{ secrets.email }}
+          git add -f mlruns/
+          git commit -m "Save mlruns from CI run" || true
           git push origin main
 
       - name: Build Docker Model
