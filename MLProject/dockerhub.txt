@@ -1,0 +1,1 @@
+https://hub.docker.com/repository/docker/dinanabila/penjualan_telur_model/general
